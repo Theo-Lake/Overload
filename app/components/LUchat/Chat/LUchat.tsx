@@ -1,8 +1,8 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-
-import React, { useState } from "react";
+import { DefaultChatTransport } from "ai";
+import React, { useEffect, useState, useMemo } from "react";
 import styles from "./LUchat.module.css";
 
 interface LUchatProps {
@@ -10,13 +10,26 @@ interface LUchatProps {
 }
 
 export default function LUchat({ onMinimize }: LUchatProps) {
-  const [input, setInput] =
-    useState(
-      ""
-    ); /* manual state to track what the user is typing in the inputbox */
-  const { messages, sendMessage, status, error } = useChat();
+  const [input, setInput] = useState("");
+  // manual state to track what the user is typing in the inputbox
 
-  console.log(messages);
+  const transport = useMemo(
+    () => new DefaultChatTransport({ api: "/api/chat" }),
+    []
+  );
+
+  const { messages, sendMessage, status, error } = useChat({ transport });
+
+  console.log("Messages:", messages);
+  console.log("First message structure:", messages[0]);
+
+  const callGetResponse = async () => {
+    if (!input.trim()) return; //this is to not send empty messages
+  };
+  //TODO this is to create the text scroll.
+  /*useEffect(() => {
+    rollIntoView({behavior: "smooth"});
+  }) */
 
   function handleSubmit(e?: React.FormEvent | React.MouseEvent) {
     e?.preventDefault();
@@ -31,7 +44,10 @@ export default function LUchat({ onMinimize }: LUchatProps) {
         content: input,
       });
       try {
-        const result = sendMessage({ text: input });
+        const result = sendMessage({
+          role: "user",
+          parts: [{ type: "text", text: input }],
+        });
         console.log("sendMessage returned:", result);
       } catch (err) {
         console.error("Error calling sendMessage:", err);
@@ -47,8 +63,8 @@ export default function LUchat({ onMinimize }: LUchatProps) {
         <header className={styles.header}>
           <div className={styles.headerLeft}>
             <img
-              src="/LUchatLogo.png"
-              alt="LU Chat Logo"
+              src="/LUbot.png"
+              alt="LU bot Logo"
               className={styles.headerLogo}
             />
             <div>
@@ -65,7 +81,7 @@ export default function LUchat({ onMinimize }: LUchatProps) {
 
         {/* Message body */}
         <div className={styles.body}>
-          {messages.length === 0 ? (
+          {messages.length === 0 ? ( //I believe this should be a assistant: message not just a botbubble.
             <div className={styles.botBubble}>
               Hi! I'm LU ChatBot. How can I help?
             </div>
