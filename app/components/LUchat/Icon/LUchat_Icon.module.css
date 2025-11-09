@@ -1,0 +1,24 @@
+.fab { /*floating action button*/
+  position: fixed;
+  left: calc(16px + env(safe-area-inset-left));
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  z-index: 1000;            
+  border-radius: 9999px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  background: transparent;  
+  cursor: pointer;
+}
+
+.iconContainer {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  cursor: pointer;
+}
+
+.iconContainer img { /*To change Size*/
+    width: 100px;
+    height: 100px;
+}
+
