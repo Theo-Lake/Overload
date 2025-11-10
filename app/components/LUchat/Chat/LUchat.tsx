@@ -1,5 +1,6 @@
 "use client";
 
+import { ThreeDot } from "react-loading-indicators";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import React, { useEffect, useState, useMemo } from "react";
@@ -12,6 +13,7 @@ interface LUchatProps {
 export default function LUchat({ onMinimize }: LUchatProps) {
   const [input, setInput] = useState("");
   // manual state to track what the user is typing in the inputbox
+  const [isSending, setIsSending] = useState(false); //track when user sends message
 
   const transport = useMemo(
     () => new DefaultChatTransport({ api: "/api/chat" }),
@@ -26,6 +28,14 @@ export default function LUchat({ onMinimize }: LUchatProps) {
   const callGetResponse = async () => {
     if (!input.trim()) return; //this is to not send empty messages
   };
+
+  useEffect(() => {
+    // Disables thinking when responding.
+    if (status === "streaming") {
+      setIsSending(false);
+    }
+  }, [status]);
+
   //TODO this is to create the text scroll.
   /*useEffect(() => {
     rollIntoView({behavior: "smooth"});
@@ -43,6 +53,7 @@ export default function LUchat({ onMinimize }: LUchatProps) {
         role: "user",
         content: input,
       });
+      setIsSending(true);
       try {
         const result = sendMessage({
           role: "user",
@@ -63,7 +74,7 @@ export default function LUchat({ onMinimize }: LUchatProps) {
         <header className={styles.header}>
           <div className={styles.headerLeft}>
             <img
-              src="/LUbot.png"
+              src="/LUchatLogo2.png"
               alt="LU bot Logo"
               className={styles.headerLogo}
             />
@@ -81,9 +92,9 @@ export default function LUchat({ onMinimize }: LUchatProps) {
 
         {/* Message body */}
         <div className={styles.body}>
-          {messages.length === 0 ? ( //I believe this should be a assistant: message not just a botbubble.
+          {messages.length === 0 ? (
             <div className={styles.botBubble}>
-              Hi! I'm LU ChatBot. How can I help?
+              Hi! I'm LU ChatBot. How are you feeling today?
             </div>
           ) : (
             // Create chat bubble for each message
@@ -105,6 +116,18 @@ export default function LUchat({ onMinimize }: LUchatProps) {
                   ))}
               </div>
             ))
+          )}
+          {isSending && (
+            <div className={styles.botBubble}>
+              Thinking
+              <ThreeDot
+                variant="bounce"
+                color="#cc3131"
+                size="small"
+                text=""
+                textColor=""
+              />
+            </div>
           )}
         </div>
 
@@ -138,5 +161,5 @@ export default function LUchat({ onMinimize }: LUchatProps) {
 
 //<MessageRenderer messages={messages} isLoading={isLoading} />
 
-// TODO: Make LU chat scrollable, make it so it DOESNT reset when minimized
+// TODO: make it so it DOESNT reset when minimized or when reset
 //Also give it access to components and stuff so that it can edit

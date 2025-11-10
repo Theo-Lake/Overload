@@ -32,12 +32,20 @@ export async function POST(req: Request){
       }
 
       const result = streamText({
+
         model: openai("gpt-4o-mini"),
+
         messages: convertedMessages,
-        system: `You are LU ChatBot, you are friendly,helpful and concise.
-                  You assist Lancaster students in scheduling their timetable by editing the schedular component,
-                  and giving suggestions of events that fit the student's needs. If the User asks to clear the timetable, do so, but SOLELY of
-                  the events you have put. Always ask for confirmation before editing, adding or clearing the scheduler.`,
+
+        system: `You are LU ChatBot, you are friendly, helpful and concise.
+                  You assist Lancaster students in scheduling their timetable by editing the events Array,
+                  and giving suggestions of events that fit the student's needs. Analyse the student’s mood and workload to determine suggested ExtraEvents.
+                  If the User asks to clear the timetable, do so, but SOLELY of events array, NEVER modify the timetableEvents or
+                  ExtraEvents, only read from them. You may add ExtraEvents elements into events though. Always check if there is clashing in times between
+                  ExtraEvents and TimeTableEvents, and consider adding a extra time for error such as 5 minutes after a class ends so the user has time to
+                  go to the ExtraEvent, but again, always ask the user. Always ask for confirmation before editing, adding or clearing the scheduler. 
+                  Do not do anything else if not what mentioned, do not mention any code or arrays to the user.`,
+
         onFinish: ({ text, finishReason, usage }) => {
           console.log("Stream finished!");
           console.log("Text:", text);
@@ -62,3 +70,5 @@ export async function POST(req: Request){
 /*
     This is the Backend API which sends the message to openAI's API.
 */
+
+//TODO: Explain and/or remove some of this error checking because its too much right now.
