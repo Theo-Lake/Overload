@@ -5,12 +5,14 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import React, { useEffect, useState, useMemo } from "react";
 import styles from "./LUchat.module.css";
+import { AIResponse } from "../../../../lib/AILogic";
 
 interface LUchatProps {
   onMinimize: () => void;
+  onProccessMessage?: (message: string) => string;
 }
 
-export default function LUchat({ onMinimize }: LUchatProps) {
+export default function LUchat({ onMinimize, onProccessMessage }: LUchatProps) {
   const [input, setInput] = useState("");
   // manual state to track what the user is typing in the inputbox
   const [isSending, setIsSending] = useState(false); //track when user sends message
@@ -49,6 +51,9 @@ export default function LUchat({ onMinimize }: LUchatProps) {
     console.log("error:", error);
 
     if (input.trim()) {
+      if (onProccessMessage) {
+        const AIResponse = onProccessMessage(input);
+      }
       console.log("Calling sendMessage with:", {
         role: "user",
         content: input,
