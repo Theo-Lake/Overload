@@ -17,9 +17,9 @@ export default function NavBar() {
         />
         <Nav className="ms-auto">
           <Nav.Link href="/">Scheduler</Nav.Link>
-          <Nav.Link href="/LUchat">LUchat</Nav.Link>
         </Nav>
       </Container>
     </Navbar>
   );
 }
+//TODO: Add name and course dynamically. With a Login (and create a DB)

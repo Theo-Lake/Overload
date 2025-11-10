@@ -42,6 +42,10 @@
   font-weight: 600;
 }
 
+.schedulerContainer :global(.fc .fc-col-header-cell-cushion) {
+  color: oklch(41% 0.159 10.272);
+}
+
 .schedulerContainer :global(.fc .fc-timegrid-slot) {
   height: 3em;
   border-color: #444;
@@ -70,4 +74,7 @@
   background-color: rgba(253, 13, 13, 0.1) !important;
 }
 
-/*TODO change colour from text that is in blue to red.*/
+
+/*
+Fix the white header which appeared for some reason.
+*/
