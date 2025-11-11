@@ -1,69 +1,61 @@
 "use client";
 
 import { ThreeDot } from "react-loading-indicators";
-import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import styles from "./LUchat.module.css";
+import { AIResponse } from "../../../../lib/AILogic";
+
+interface Message {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+}
 
 interface LUchatProps {
   onMinimize: () => void;
+  onProccessMessage?: (message: string) => string;
 }
 
-export default function LUchat({ onMinimize }: LUchatProps) {
+export default function LUchat({ onMinimize, onProccessMessage }: LUchatProps) {
   const [input, setInput] = useState("");
-  // manual state to track what the user is typing in the inputbox
-  const [isSending, setIsSending] = useState(false); //track when user sends message
-
-  const transport = useMemo(
-    () => new DefaultChatTransport({ api: "/api/chat" }),
-    []
-  );
-
-  const { messages, sendMessage, status, error } = useChat({ transport });
-
-  console.log("Messages:", messages);
-  console.log("First message structure:", messages[0]);
-
-  const callGetResponse = async () => {
-    if (!input.trim()) return; //this is to not send empty messages
-  };
-
-  useEffect(() => {
-    // Disables thinking when responding.
-    if (status === "streaming") {
-      setIsSending(false);
-    }
-  }, [status]);
-
-  //TODO this is to create the text scroll.
-  /*useEffect(() => {
-    rollIntoView({behavior: "smooth"});
-  }) */
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isSending, setIsSending] = useState(false);
 
   function handleSubmit(e?: React.FormEvent | React.MouseEvent) {
     e?.preventDefault();
-    console.log("handleSubmit called, input:", input);
-    console.log("sendMessage function:", sendMessage);
-    console.log("status:", status);
-    console.log("error:", error);
 
     if (input.trim()) {
-      console.log("Calling sendMessage with:", {
+      // Add user message
+      const userMessage: Message = {
+        id: Date.now().toString(),
         role: "user",
         content: input,
-      });
-      setIsSending(true);
-      try {
-        const result = sendMessage({
-          role: "user",
-          parts: [{ type: "text", text: input }],
-        });
-        console.log("sendMessage returned:", result);
-      } catch (err) {
-        console.error("Error calling sendMessage:", err);
-      }
+      };
+      setMessages((prev) => [...prev, userMessage]);
       setInput("");
+      setIsSending(true);
+
+      // Process message with AILogic
+      setTimeout(() => {
+        if (onProccessMessage) {
+          const responseText = onProccessMessage(input);
+          const botMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content: responseText,
+          };
+          setMessages((prev) => [...prev, botMessage]);
+        } else {
+          // Fallback response if no processor is provided
+          const botMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content: "I'm here to help with your schedule! Tell me how you're feeling or what you'd like to do.",
+          };
+          setMessages((prev) => [...prev, botMessage]);
+        }
+        setIsSending(false);
+      }, 500); // Small delay to simulate processing
     }
   }
 
@@ -81,7 +73,7 @@ export default function LUchat({ onMinimize }: LUchatProps) {
             <div>
               <div className={styles.title}>LU Chat</div>
               <div className={styles.subtitle}>
-                {status === "streaming" ? "Typing..." : "Online now"}
+                {isSending ? "Typing..." : "Online now"}
               </div>
             </div>
           </div>
@@ -105,15 +97,7 @@ export default function LUchat({ onMinimize }: LUchatProps) {
                   msg.role === "user" ? styles.userBubble : styles.botBubble
                 }
               >
-                {msg.parts /*TODO allow other than text maybe? */
-                  .filter(
-                    (part) => part.type === "text"
-                  ) /* Filtering so only text shows up */
-                  .map((part, idx) => (
-                    <span key={idx}>
-                      {part.text}
-                    </span> /* Displaying the actual text in part.text (a key is needed to uniquely specify each messaage) */
-                  ))}
+                {msg.content}
               </div>
             ))
           )}
@@ -144,12 +128,12 @@ export default function LUchat({ onMinimize }: LUchatProps) {
                 handleSubmit(e);
               }
             }}
-            disabled={status === "streaming"}
+            disabled={isSending}
           />
           <button
             className={styles.sendBtn}
             onClick={handleSubmit}
-            disabled={status === "streaming" || !input.trim()} //This is to disable the button when AI is responding.
+            disabled={isSending || !input.trim()} //This is to disable the button when AI is responding.
           >
             Send
           </button>

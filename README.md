@@ -6,6 +6,12 @@ Example Input:
 “
     Hey, I’m feeling tired today.
     Yes, those seem nice!
-    You know what, actually I don’t want those. Please clear them.
+    Hey
+    Please clear my events.
     Yes.
 ”
+
+Video Demo: https://www.youtube.com/watch?v=uaJft5sjtiw
+
+
+
