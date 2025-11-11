@@ -349,6 +349,9 @@ export const ExtraEvents = [
 export default function Scheduler({ events: propEvents }: SchedulerProps) {
   const events = propEvents || TimeTableEvents;
 
+  console.log("[Scheduler] Rendering with events count:", events.length);
+  console.log("[Scheduler] Events:", events);
+
   //TODO: Make it so AI can change and add events.
 
   return (
@@ -357,8 +360,8 @@ export default function Scheduler({ events: propEvents }: SchedulerProps) {
         plugins={[timeGridPlugin, interactionPlugin]}
         initialView="timeGridWeek"
         events={events}
-        slotMinTime="08:00:00"
-        slotMaxTime="19:00:00"
+        slotMinTime="06:00:00"
+        slotMaxTime="23:00:00"
         allDaySlot={false}
         headerToolbar={{
           left: "prev,next today",
@@ -366,7 +369,7 @@ export default function Scheduler({ events: propEvents }: SchedulerProps) {
           right: "timeGridWeek,timeGridDay",
         }}
         height="auto"
-        key="fullcalendar"
+        key={events.length}
       />
     </div>
   );

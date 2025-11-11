@@ -111,21 +111,24 @@ export function getSuggestions(
 ): { suggestions: CalendarEvent[], warnings: string[] } {
   const suggestions: CalendarEvent[] = [];
   const warnings: string[] = [];
-  
+
   // Get relevant categories for mood
   const relevantCategories = eventCategories[mood as keyof typeof eventCategories] || [];
-  
+  console.log(`[getSuggestions] Mood: ${mood}`);
+  console.log(`[getSuggestions] Relevant categories:`, relevantCategories);
+
   // Filter extra events by mood
-  const relevantEvents = extraEvents.filter(event => 
-    relevantCategories.some(category => 
+  const relevantEvents = extraEvents.filter(event =>
+    relevantCategories.some(category =>
       event.title.toLowerCase().includes(category.toLowerCase())
     )
   );
-  
+  console.log(`[getSuggestions] Found ${relevantEvents.length} relevant events:`, relevantEvents.map(e => e.title));
+
   // Check each relevant event for clashes
   for (const event of relevantEvents) {
     let hasClash = false;
-    
+
     // Check against timetable events
     for (const ttEvent of timeTableEvents) {
       if (checkClash(event, ttEvent)) {
@@ -134,7 +137,7 @@ export function getSuggestions(
         break;
       }
     }
-    
+
     // Check against current events (already added extra events)
     if (!hasClash) {
       for (const currentEvent of currentEvents) {
@@ -145,12 +148,20 @@ export function getSuggestions(
         }
       }
     }
-    
+
     if (!hasClash && suggestions.length < 3) { // Limit to 3 suggestions
+      console.log(`[getSuggestions] Adding to suggestions: ${event.title}`);
       suggestions.push(event);
+    } else if (hasClash) {
+      console.log(`[getSuggestions] Skipping ${event.title} due to clash`);
+    } else {
+      console.log(`[getSuggestions] Skipping ${event.title} - already have 3 suggestions`);
     }
   }
-  
+
+  console.log(`[getSuggestions] Final suggestions count: ${suggestions.length}`);
+  console.log(`[getSuggestions] Final suggestions:`, suggestions);
+
   return { suggestions, warnings };
 }
 
@@ -250,7 +261,7 @@ export function processAISchedulerCommand(
       
       return {
         action: null,
-        message: "I'm here to help with your schedule! You can:\n• Tell me how you're feeling (e.g., 'I'm stressed')\n• Ask for activity suggestions ('What should I do today?')\n• Clear extra events ('Clear my extra activities')\n• Add or remove specific events",
+        message: "I'm here to help with your schedule! You can:\n• Tell me how you're feeling (e.g., 'I'm stressed')\n• Ask for activity suggestions ('What should I do today?')\n• Clear extra events ('Clear my extra activities')",
         warnings: []
       };
     }
